@@ -8,14 +8,14 @@ void bitarray_push_literal(bitarray_t* arr, uint8_t lit) {
     bitarray_push_byte(arr, lit);
 }
 
-void bitarray_push_pointer(bitarray_t* arr, uint8_t length, uint16_t offset) {
+void bitarray_push_pointer(bitarray_t* arr, uint16_t length, uint16_t offset) {
     length -= 3;
     offset -= 1;
     bitarray_push_bit(arr, true);
-    bitarray_push_byte(arr, length);
-    bitarray_push_byte(arr, offset >> 8);
-    bitarray_push_byte(arr, ((uint8_t)(offset & 0xFF)) << 1);
+    bitarray_push_byte(arr, (uint8_t)length);
+    bitarray_push_byte(arr, (offset >> 8) << 1); // 7 most significant bits
     arr->length--; // sue me
+    bitarray_push_byte(arr, (uint8_t)offset); // 8 least significant bits
 }
 
 int main(void) {
@@ -23,10 +23,10 @@ int main(void) {
     bitarray_push_literal(a, 'a');
     bitarray_push_literal(a, 'b');
     bitarray_push_literal(a, 'a');
-    bitarray_push_pointer(a, 3, 3);
+    bitarray_push_pointer(a, 258, 0x8000);
     bitarray_push_literal(a, 'd');
     bitarray_push_literal(a, 'a');
-    bitarray_push_pointer(a, 6, 2);
+    bitarray_push_pointer(a, 258, 0x8000);
     bitarray_push_literal(a, 'c');
 
     FILE* fout = fopen("bitarray.out", "wb");
